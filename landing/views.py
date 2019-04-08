@@ -1,61 +1,76 @@
 from django.shortcuts import render
-from .forms import PostForm
+from django.shortcuts import redirect
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+from django.contrib.auth import logout as django_logout
 	
 # Create your views here.
 
 def home(request):
+    """
+    Home function
+    """
     print("Home")
     return render(request, 'landing/index.html', {'user':request.user})
 
 
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from . import templates
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-#from events.models import bankDetails
-from django.contrib.auth import logout as django_logout
+
 
 def login1(request):
-	print("Hitting Home Page Successfull111")
+    """
+    Return login page
+    """
 
-	#return HttpResponse("Done and dusted")
-	return render(request,'landing/login.html')
+    return render(request, 'landing/login.html')
 
 def logout(request):
+    """
+    Return logout page
+    """
     django_logout(request)
     print("Logging out")
     return redirect('/')
 
 
 def signup(request):
-	return render(request,'landing/signup.html')
+    """
+    Return sign up page
+    """
+    return render(request, 'landing/signup.html')
 
 
 def signup_submit(request):
+    """
+    function which runs after clicking sign up submit
+    """
     print("Creating a new user")
     username = request.POST.get('username')
     password = request.POST.get('password')
     email = request.POST.get('email')
-    #bank = request.POST.get('bank')
-    #print(type(bank))
-    user = User.objects.create_user(username=username, email=email,password=password)
+    if username == '' or password == '' or email == "":
+        return render(request, 'landing/signup.html')
+
+    user = User.objects.create_user(username=username, email=email, password=password)
     user.save()
-    # bankObj = bankDetails.objects.create(userName = user,bankDetails=bank)
-    # bankObj.save()
+
     return redirect('/')
 
 
 
 def logging_in(request):
+    """
+    Function which runs after log in button is pressed
+
+    """
     username = request.POST['username']
     password = request.POST['password']
+    if username == '' or password == '':
+        return render(request, 'landing/login.html')
     user = authenticate(request, username=username, password=password)
     print(user)
     if user is not None:
         login(request,user)
-        return redirect('/',{'user':request.user})
+        return redirect('/', {'user':request.user})
         # Redirect to a success page.
         ...
     else:
